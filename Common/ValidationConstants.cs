@@ -12,6 +12,7 @@
             public const int SeminarDetailsMaxLength = 500;
             public const int SeminarDurationMinValue = 30;
             public const int SeminarDurationMaxValue = 30;
+            public const string DateAndTimeFormat = "dd/MM/yyyy HH:mm";
         }
 
         public static class CategoryConstants
