@@ -135,6 +135,36 @@ namespace SeminarHub.Controllers
             return View(currentUserSeminars);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Join(int id)
+        {
+            var seminarToJoin = await data.Seminars
+                .Where(s => s.Id == id)
+                .Include(s=>s.SeminarsParticipants)
+                .FirstOrDefaultAsync();
+
+            if (seminarToJoin == null)
+            {
+                return BadRequest();
+            }
+
+            if (seminarToJoin.SeminarsParticipants.Any(sp=>sp.ParticipantId==GetUserId()))
+            {
+                return RedirectToAction(nameof(All));
+            }
+
+            seminarToJoin.SeminarsParticipants.Add(new SeminarParticipant()
+            {
+                SeminarId=seminarToJoin.Id,
+                ParticipantId=GetUserId(),
+            });
+
+            await data.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Joined));
+        }
+
+
         private string GetUserId()
         {
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
