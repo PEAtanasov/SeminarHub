@@ -164,6 +164,35 @@ namespace SeminarHub.Controllers
             return RedirectToAction(nameof(Joined));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Leave(int id)
+        {
+            var seminarToLeave = await data.Seminars
+                .Where(s => s.Id == id)
+                .Include(s => s.SeminarsParticipants)
+                .FirstOrDefaultAsync();
+
+            if (seminarToLeave == null)
+            {
+                return BadRequest();
+            }
+
+            if (!seminarToLeave.SeminarsParticipants.Any(sp => sp.ParticipantId == GetUserId()))
+            {
+                return BadRequest();
+            }
+
+            var entityToLeave = seminarToLeave.SeminarsParticipants.FirstOrDefault(ep => ep.ParticipantId == GetUserId());
+
+            if (entityToLeave != null)
+            {
+                data.SeminarsParticipants.Remove(entityToLeave);
+                await data.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Joined));
+        }
+
 
         private string GetUserId()
         {
