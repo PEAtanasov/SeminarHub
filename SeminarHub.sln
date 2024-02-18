@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeminarHub", "SeminarHub\SeminarHub.csproj", "{51CE381E-32A2-4CCD-98B3-8BDD8F8C98CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SeminarHub", "SeminarHub\SeminarHub.csproj", "{51CE381E-32A2-4CCD-98B3-8BDD8F8C98CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{5EA602CC-48B6-4F4D-8A7D-657DC5B5FB78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{51CE381E-32A2-4CCD-98B3-8BDD8F8C98CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51CE381E-32A2-4CCD-98B3-8BDD8F8C98CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51CE381E-32A2-4CCD-98B3-8BDD8F8C98CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EA602CC-48B6-4F4D-8A7D-657DC5B5FB78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EA602CC-48B6-4F4D-8A7D-657DC5B5FB78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EA602CC-48B6-4F4D-8A7D-657DC5B5FB78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EA602CC-48B6-4F4D-8A7D-657DC5B5FB78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
