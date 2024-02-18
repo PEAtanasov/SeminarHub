@@ -6,6 +6,10 @@ using static Common.ValidationConstants.SeminarConstants;
 
 namespace SeminarHub.Data.Models
 {
+    /// <summary>
+    /// Seminar database entity
+    /// </summary>
+    [Comment("Seminar database entity")]
     public class Seminar
     {
         /// <summary>

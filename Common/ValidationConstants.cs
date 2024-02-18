@@ -13,5 +13,11 @@
             public const int SeminarDurationMinValue = 30;
             public const int SeminarDurationMaxValue = 30;
         }
+
+        public static class CategoryConstants
+        {
+            public const int CategoryNameMinLength = 3;
+            public const int CategoryNameMaxLength = 50;
+        }
     }
 }
