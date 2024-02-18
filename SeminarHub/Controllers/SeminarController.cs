@@ -25,7 +25,7 @@ namespace SeminarHub.Controllers
         {
             var model = await data.Seminars
                 .AsNoTracking()
-                .Select(s=> new SeminarViewModel()
+                .Select(s => new SeminarViewModel()
                 {
                     Id = s.Id,
                     Topic = s.Topic,
@@ -91,6 +91,86 @@ namespace SeminarHub.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var seminarToEdit = await data.Seminars
+                .FindAsync(id);
+
+            if (seminarToEdit == null)
+            {
+                return BadRequest();
+            }
+
+            var userId = GetUserId();
+
+            if (userId != seminarToEdit.OrganizerId)
+            {
+                return Unauthorized();
+            }
+
+            var model = new SeminarFormModel()
+            {
+                Id = id,
+                Topic = seminarToEdit.Topic,
+                OrganizerId = seminarToEdit.OrganizerId,
+                Details = seminarToEdit.Details,
+                CategoryId = seminarToEdit.CategoryId,
+                DateAndTime = seminarToEdit.DateAndTime.ToString(DateAndTimeFormat),
+                Duration = seminarToEdit.Duration,
+                Categories = await GetCategoriesAsync(),
+                Lecturer=seminarToEdit.Lecturer               
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(SeminarFormModel model)
+        {
+            var seminarToEdit = await data.Seminars
+                .FindAsync(model.Id);
+
+            if (seminarToEdit == null)
+            {
+                return BadRequest();
+            }
+
+            if (GetUserId() != seminarToEdit.OrganizerId)
+            {
+                return Unauthorized();
+            }
+
+            DateTime parsedDateAndTime = DateTime.Now;
+
+            if (!DateTime.TryParseExact(
+                model.DateAndTime,
+                DateAndTimeFormat,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out parsedDateAndTime))
+            {
+                ModelState.AddModelError(nameof(model.DateAndTime), $"Invalid Date. Format must be: {DateAndTimeFormat}");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Categories = await GetCategoriesAsync();
+                return View(model);
+            }
+
+            seminarToEdit.Topic=model.Topic;
+            seminarToEdit.Lecturer=model.Lecturer;
+            seminarToEdit.Details = model.Details;
+            seminarToEdit.DateAndTime = parsedDateAndTime;
+            seminarToEdit.Duration= model.Duration;
+            seminarToEdit.CategoryId = model.CategoryId;
+
+            await data.SaveChangesAsync();
+
+            return RedirectToAction(nameof(All));
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Joined()
         {
             var userId = GetUserId();
@@ -140,7 +220,7 @@ namespace SeminarHub.Controllers
         {
             var seminarToJoin = await data.Seminars
                 .Where(s => s.Id == id)
-                .Include(s=>s.SeminarsParticipants)
+                .Include(s => s.SeminarsParticipants)
                 .FirstOrDefaultAsync();
 
             if (seminarToJoin == null)
@@ -148,15 +228,15 @@ namespace SeminarHub.Controllers
                 return BadRequest();
             }
 
-            if (seminarToJoin.SeminarsParticipants.Any(sp=>sp.ParticipantId==GetUserId()))
+            if (seminarToJoin.SeminarsParticipants.Any(sp => sp.ParticipantId == GetUserId()))
             {
                 return RedirectToAction(nameof(All));
             }
 
             seminarToJoin.SeminarsParticipants.Add(new SeminarParticipant()
             {
-                SeminarId=seminarToJoin.Id,
-                ParticipantId=GetUserId(),
+                SeminarId = seminarToJoin.Id,
+                ParticipantId = GetUserId(),
             });
 
             await data.SaveChangesAsync();
@@ -192,6 +272,8 @@ namespace SeminarHub.Controllers
 
             return RedirectToAction(nameof(Joined));
         }
+
+
 
 
         private string GetUserId()
