@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using System.Security.Claims;
 
 using SeminarHub.Data;
 using SeminarHub.Data.Models;
 using SeminarHub.Models;
 
+using System.Globalization;
+using System.Security.Claims;
 using static Common.ValidationConstants.SeminarConstants;
 
 namespace SeminarHub.Controllers
@@ -118,7 +118,7 @@ namespace SeminarHub.Controllers
                 DateAndTime = seminarToEdit.DateAndTime.ToString(DateAndTimeFormat),
                 Duration = seminarToEdit.Duration,
                 Categories = await GetCategoriesAsync(),
-                Lecturer=seminarToEdit.Lecturer               
+                Lecturer = seminarToEdit.Lecturer
             };
 
             return View(model);
@@ -158,11 +158,11 @@ namespace SeminarHub.Controllers
                 return View(model);
             }
 
-            seminarToEdit.Topic=model.Topic;
-            seminarToEdit.Lecturer=model.Lecturer;
+            seminarToEdit.Topic = model.Topic;
+            seminarToEdit.Lecturer = model.Lecturer;
             seminarToEdit.Details = model.Details;
             seminarToEdit.DateAndTime = parsedDateAndTime;
-            seminarToEdit.Duration= model.Duration;
+            seminarToEdit.Duration = model.Duration;
             seminarToEdit.CategoryId = model.CategoryId;
 
             await data.SaveChangesAsync();
@@ -273,6 +273,76 @@ namespace SeminarHub.Controllers
             return RedirectToAction(nameof(Joined));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var seminarToDisplay = await data.Seminars
+                .Where(s => s.Id == id)
+                .Include(s=>s.Organizer)
+                .Include(s=>s.Category)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (seminarToDisplay == null)
+            {
+                return BadRequest();
+            }
+
+            var model = new SeminarDetailsViewModel()
+            {
+                Id = seminarToDisplay.Id,
+                Topic = seminarToDisplay.Topic,
+                DateAndTime = seminarToDisplay.DateAndTime.ToString(DateAndTimeFormat),
+                Category = seminarToDisplay.Category.Name,
+                Details = seminarToDisplay.Details,
+                Duration = seminarToDisplay.Duration,
+                Lecturer = seminarToDisplay.Lecturer,
+                Organizer = seminarToDisplay.Organizer.UserName
+            };
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var seminarToDelete = await data.Seminars.FindAsync(id);
+
+            if (seminarToDelete == null)
+            {
+                return BadRequest();
+            }
+
+            var model = new SeminarDeleteViewModel()
+            {
+                Id = seminarToDelete.Id,
+                Topic = seminarToDelete.Topic,
+                DateAndTime = seminarToDelete.DateAndTime,
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteConfirmed(SeminarDeleteViewModel model)
+        {
+            var seminarToDelete = await data.Seminars.FindAsync(model.Id);
+
+            if (seminarToDelete == null)
+            {
+                return BadRequest();
+            }
+
+            if (GetUserId() != seminarToDelete.OrganizerId)
+            {
+                return Unauthorized();
+            }
+
+            data.Seminars.Remove(seminarToDelete);
+            await data.SaveChangesAsync();
+
+            return RedirectToAction(nameof(All));
+        }
 
 
 
