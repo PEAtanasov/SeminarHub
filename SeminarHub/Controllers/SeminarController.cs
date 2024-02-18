@@ -90,6 +90,51 @@ namespace SeminarHub.Controllers
             return RedirectToAction(nameof(All));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Joined()
+        {
+            var userId = GetUserId();
+
+            ICollection<SeminarViewModel> currentUserSeminars = new List<SeminarViewModel>();
+
+            var currentUserCreatedSeminars = await data.Seminars
+                .Where(s => s.OrganizerId == userId)
+                .AsNoTracking()
+                .Select(s => new SeminarViewModel()
+                {
+                    Id = s.Id,
+                    Topic = s.Topic,
+                    Lecturer = s.Lecturer,
+                    DateAndTime = s.DateAndTime.ToString(DateAndTimeFormat),
+                    Organizer = s.Organizer.UserName,
+                    Category = s.Category.Name
+                })
+                .ToListAsync();
+
+            currentUserSeminars = currentUserCreatedSeminars;
+
+            var currentUserJoinedSeminars = await data.SeminarsParticipants
+                .Where(sp => sp.ParticipantId == userId)
+                .AsNoTracking()
+                .Select(s => new SeminarViewModel()
+                {
+                    Id = s.SeminarId,
+                    Topic = s.Seminar.Topic,
+                    Lecturer = s.Seminar.Lecturer,
+                    DateAndTime = s.Seminar.DateAndTime.ToString(DateAndTimeFormat),
+                    Organizer = s.Seminar.Organizer.UserName,
+                    Category = s.Seminar.Category.Name
+                })
+                .ToListAsync();
+
+            foreach (var seminar in currentUserJoinedSeminars)
+            {
+                currentUserSeminars.Add(seminar);
+            }
+
+            return View(currentUserSeminars);
+        }
+
         private string GetUserId()
         {
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
