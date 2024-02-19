@@ -332,7 +332,6 @@ namespace SeminarHub.Controllers
         public async Task<IActionResult> DeleteConfirmed(SeminarDeleteViewModel model)
         {
             var seminarToDelete = await data.Seminars.FindAsync(model.Id);
-            var seminarParticipantToDelete = await data.SeminarsParticipants.Where(sp => sp.SeminarId == model.Id).ToListAsync();
 
             if (seminarToDelete == null)
             {
@@ -344,10 +343,9 @@ namespace SeminarHub.Controllers
                 return Unauthorized();
             }
 
-            foreach (var seminar in seminarParticipantToDelete)
-            {
-                data.SeminarsParticipants.Remove(seminar);
-            }
+            var seminarsParticipantsToDelete = await data.SeminarsParticipants.Where(sp => sp.SeminarId == model.Id).ToListAsync();
+
+            data.RemoveRange(seminarsParticipantsToDelete);
 
             data.Seminars.Remove(seminarToDelete);
             await data.SaveChangesAsync();
